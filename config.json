@@ -1,0 +1,6 @@
+{
+    "input_base_path": "/input/your/path/to/minecraft/saves/world_name",
+    "unmined_path": "/input/your/path/to/unmined/world_name",
+    "target_village_name": "village_name",
+    "output_path": "./out/village_name"
+}
