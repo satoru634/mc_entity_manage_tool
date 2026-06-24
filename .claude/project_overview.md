@@ -24,6 +24,10 @@ common_libs/
   generate_unmined_marker.py  ... uNmined マーカー JS 生成
   map_properties.py      ... uNmined マッププロパティ読み込み・ズーム計算
   point_3d.py            ... 3次元座標クラス
+requirements.txt         ... 依存ライブラリ一覧
+setup/
+  setup_venv.bat         ... venv セットアップスクリプト（Windows）
+  setup_venv.sh          ... venv セットアップスクリプト（Linux/Mac）
 ```
 
 ---
