@@ -1,0 +1,9 @@
+anvil-parser==0.9.0
+NBT==1.5.1
+pandas==2.2.3
+tqdm==4.67.0
+opencv-python==4.10.0.84
+pyhumps==3.8.0
+
+# テスト
+pytest==8.3.5
