@@ -1,5 +1,5 @@
-import os
 import copy
+import pathlib
 
 import pandas as pd
 
@@ -13,7 +13,7 @@ class GenerateUnminedMarker:
     ) -> None:
         self.__df_villagers_info = df_villagers_info
         self.__df_village_info = df_village_info
-        self.__base_path = base_path
+        self.__base_path = pathlib.Path(base_path)
 
         self.__marker_list = []
 
@@ -89,9 +89,7 @@ class GenerateUnminedMarker:
 
         out_text += self.__INDENT + "]\n"
         out_text = self.__JS_TEMPLATE.replace("<replace>", out_text)
-        with open(
-            os.path.join(self.__base_path, "custom.markers.js"), "w", encoding="utf-8"
-        ) as f:
+        with open(self.__base_path / "custom.markers.js", "w", encoding="utf-8") as f:
             f.write(out_text)
 
         return

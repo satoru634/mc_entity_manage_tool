@@ -1,9 +1,8 @@
 import argparse
-import os
 import pathlib
 import sys
 import json
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from tqdm import tqdm
 
 import anvil
@@ -25,10 +24,10 @@ class VillagerInfo:
         output_path: str,
         filter_all_maid: bool,
     ) -> None:
-        self.__input_base_path = input_base_path
-        self.__unmined_path = unmined_path
+        self.__input_base_path = pathlib.Path(input_base_path)
+        self.__unmined_path = pathlib.Path(unmined_path)
         self.__target_village_name = target_village_name
-        self.__output_path = os.path.join(output_path, "villagers_info")
+        self.__output_path = pathlib.Path(output_path) / "villagers_info"
         self.__filter_all_maid = filter_all_maid
 
         # self.__MAID_ID = ["littlemaidrebirth:little_maid_mob", "touhou_little_maid:maid"]
@@ -36,7 +35,9 @@ class VillagerInfo:
         self.__BOAT_ID = ["minecraft:boat"]
         self.__VILLAGER_ID = ["mca:male_villager", "mca:female_villager"]
 
-        self.__UPDATE_ATTR_PATH = "datapacks\\my_functions\\data\\mca\\functions\\update_max_health.mcfunction"
+        self.__UPDATE_ATTR_PATH = pathlib.Path(
+            "datapacks/my_functions/data/mca/functions/update_max_health.mcfunction"
+        )
 
         self.__VILLAGER_COLS = list(const.EXTRACT_TABLE.keys())
         self.__INVENTORY_COLS = self.__generate_inventory_cols()
@@ -52,7 +53,7 @@ class VillagerInfo:
 
     def __get_villager_info(self) -> Dict:
         nbt_file = NBTFile(
-            os.path.join(self.__input_base_path, "data", "mca_villages.dat"), "rb"
+            str(self.__input_base_path / "data" / "mca_villages.dat"), "rb"
         )
         villages: TAG_Compound = nbt_file["data"]["villages"]
 
@@ -101,17 +102,16 @@ class VillagerInfo:
     def __generate_inventory_cols(self) -> List[str]:
         return [f"inventory_{str(index).zfill(2)}" for index in range(27)]
 
-    def __get_entities_file_list(self) -> List[str]:
+    def __get_entities_file_list(self) -> List[pathlib.Path]:
         # エンティティファイル一覧取得
-        p_dir = pathlib.Path(os.path.join(self.__input_base_path, "entities"))
-        file_list = [
-            str(file_path) for file_path in sorted(list(p_dir.glob("**/*.mca")))
-        ]
-        return file_list
+        p_dir = self.__input_base_path / "entities"
+        return sorted(p_dir.glob("**/*.mca"))
 
-    def __read_region(self, path: str, region_x: int, region_z: int) -> pd.DataFrame:
+    def __read_region(
+        self, path: pathlib.Path, region_x: int, region_z: int
+    ) -> pd.DataFrame:
         try:
-            region = anvil.Region.from_file(path)
+            region = anvil.Region.from_file(str(path))
         except AttributeError as e:
             return
 
@@ -163,13 +163,10 @@ class VillagerInfo:
             else:
                 self.__df_villagers_info = df_region.copy()
 
-        region_base_path = os.path.join(self.__output_path, "_region")
-        if not os.path.exists(region_base_path):
-            os.makedirs(region_base_path)
+        region_base_path = self.__output_path / "_region"
+        region_base_path.mkdir(parents=True, exist_ok=True)
 
-        region_path = os.path.join(
-            region_base_path, "region_{0}_{1}.csv".format(region_x, region_z)
-        )
+        region_path = region_base_path / f"region_{region_x}_{region_z}.csv"
         df_region.to_csv(region_path, index=False)
         return
 
@@ -299,9 +296,7 @@ class VillagerInfo:
                 cmd_list[key].append(attr)
 
         # ファイルに書き出す
-        with open(
-            os.path.join(self.__input_base_path, self.__UPDATE_ATTR_PATH), "w"
-        ) as f:
+        with open(self.__input_base_path / self.__UPDATE_ATTR_PATH, "w") as f:
             for key in cmd_list.keys():
                 f.write("\n".join(cmd_list[key]))
                 f.write("\n\n")
@@ -314,9 +309,8 @@ class VillagerInfo:
     def __filter_villagers(
         self, row: pd.Series, df_villagers_info: pd.DataFrame
     ) -> pd.Series:
-        output_path = os.path.join(self.__output_path, row["village_name"])
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
+        output_path = self.__output_path / row["village_name"]
+        output_path.mkdir(parents=True, exist_ok=True)
 
         df_village_filter = df_villagers_info[
             df_villagers_info["village_name"] == row["village_name"]
@@ -334,21 +328,17 @@ class VillagerInfo:
         df_village_filter = pd.concat([df_village_filter, df_no_village_filter])
         df_basic_info = df_village_filter[self.__VILLAGER_COLS]
         df_basic_info = df_basic_info.sort_values("hearts")
-        df_basic_info.to_csv(
-            os.path.join(output_path, "all_villagers.csv"), index=False
-        )
+        df_basic_info.to_csv(output_path / "all_villagers.csv", index=False)
 
         df_inventory_info = df_village_filter[
             ["name", "UUID", "profession"] + self.__INVENTORY_COLS
         ]
         df_inventory_info.to_csv(
-            os.path.join(output_path, "all_villagers_inventory.csv"), index=False
+            output_path / "all_villagers_inventory.csv", index=False
         )
 
         df_not_best_friend = df_basic_info[df_basic_info["hearts"] < 100]
-        df_not_best_friend.to_csv(
-            os.path.join(output_path, "not_best_friends.csv"), index=False
-        )
+        df_not_best_friend.to_csv(output_path / "not_best_friends.csv", index=False)
 
         df_not_trading_list = df_basic_info[
             (df_basic_info["has_trading"] == False)
@@ -357,17 +347,15 @@ class VillagerInfo:
             & (df_basic_info["profession"] != "無法者")
             & (df_basic_info["profession"] != "メイド")
         ]
-        df_not_trading_list.to_csv(
-            os.path.join(output_path, "not_trading_list.csv"), index=False
-        )
+        df_not_trading_list.to_csv(output_path / "not_trading_list.csv", index=False)
 
         df_has_baby = df_basic_info[df_basic_info["has_baby"] == True]
-        has_baby_path = os.path.join(output_path, "has_baby.csv")
+        has_baby_path = output_path / "has_baby.csv"
         if len(df_has_baby) > 0:
             df_has_baby.to_csv(has_baby_path, index=False)
         else:
-            if os.path.exists(has_baby_path):
-                os.remove(has_baby_path)
+            if has_baby_path.exists():
+                has_baby_path.unlink()
 
         # 体力最大値アップ・回復コマンド生成
         if row["village_name"] == self.__target_village_name:
@@ -401,12 +389,8 @@ class VillagerInfo:
         df_maid_info = self.__df_villagers_info[
             self.__df_villagers_info["profession"] == "メイド(未契約)"
         ]
-        df_villagers_info.to_csv(
-            os.path.join(self.__output_path, "all_villagers.csv"), index=False
-        )
-        df_maid_info.to_csv(
-            os.path.join(self.__output_path, "maid_info.csv"), index=False
-        )
+        df_villagers_info.to_csv(self.__output_path / "all_villagers.csv", index=False)
+        df_maid_info.to_csv(self.__output_path / "maid_info.csv", index=False)
 
         self.__df_village_info[["population", "guards", "guard_rate"]] = (
             self.__df_village_info.apply(
@@ -418,41 +402,37 @@ class VillagerInfo:
             "population", ascending=False
         )
         self.__df_village_info.to_csv(
-            os.path.join(self.__output_path, "all_villages.csv"), index=False
+            self.__output_path / "all_villages.csv", index=False
         )
         return
 
     def get_info(self) -> None:
-        if not os.path.exists(self.__output_path):
-            os.makedirs(self.__output_path)
+        self.__output_path.mkdir(parents=True, exist_ok=True)
 
         self.__df_villagers_info = pd.DataFrame(columns=self.__COLUMNS)
-        entities_list_path = os.path.join(self.__output_path, "entities_list.json")
-        if os.path.exists(entities_list_path):
+        entities_list_path = self.__output_path / "entities_list.json"
+        if entities_list_path.exists():
             with open(entities_list_path, "r") as f:
                 entities_list = json.load(f)
         else:
             entities_list = {}
 
         for path in tqdm(self.__get_entities_file_list()):
-            filename = os.path.basename(path)
+            filename = path.name
             split_region = filename.split(".")
 
             prev_st_mtime = -1.0
             if filename in entities_list:
                 prev_st_mtime = entities_list[filename]
 
-            new_st_mtime = pathlib.Path(path).stat().st_mtime
+            new_st_mtime = path.stat().st_mtime
             if prev_st_mtime != new_st_mtime:
                 entities_list[filename] = new_st_mtime
                 self.__read_region(path, int(split_region[1]), int(split_region[2]))
             else:
-                region_base_path = os.path.join(self.__output_path, "_region")
-                region_path = os.path.join(
-                    region_base_path,
-                    "region_{0}_{1}.csv".format(
-                        int(split_region[1]), int(split_region[2])
-                    ),
+                region_base_path = self.__output_path / "_region"
+                region_path = region_base_path / "region_{0}_{1}.csv".format(
+                    int(split_region[1]), int(split_region[2])
                 )
                 df = pd.read_csv(region_path, low_memory=False)
                 df["updated"] = False
@@ -467,7 +447,7 @@ class VillagerInfo:
         with open(entities_list_path, "w") as f:
             json.dump(entities_list, f, indent=2)
 
-        with open(os.path.join(self.__output_path, "village_info.json"), "w") as f:
+        with open(self.__output_path / "village_info.json", "w") as f:
             json.dump(self.__village_info, f, indent=2)
 
         df_villagers = (
