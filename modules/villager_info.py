@@ -1,4 +1,3 @@
-import argparse
 import pathlib
 import sys
 import json
@@ -9,10 +8,10 @@ import anvil
 import pandas as pd
 from nbt.nbt import NBTFile, TAG_Compound, TAG_List
 
-from common_libs import const
-from common_libs.common_lib import CommonLib
-from common_libs.point_3d import Point3D
-from common_libs.generate_unmined_marker import GenerateUnminedMarker
+from modules import const
+from modules.common_lib import CommonLib
+from modules.point_3d import Point3D
+from modules.generate_unmined_marker import GenerateUnminedMarker
 
 
 class VillagerInfo:
@@ -468,40 +467,3 @@ class VillagerInfo:
         # csv出力
         self.__output_csv()
         return
-
-
-def _load_config(config_path: str) -> dict:
-    path = pathlib.Path(config_path)
-    if path.suffix.lower() != ".json":
-        print(
-            f"エラー: --config にはJSONファイル(.json)のみ指定できます: {config_path}"
-        )
-        sys.exit(1)
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def main():
-    parser = argparse.ArgumentParser(description="村人情報抽出ツール")
-    parser.add_argument(
-        "-c",
-        "--config",
-        default="config.json",
-        help="設定ファイル(JSON形式、省略時はconfig.json)",
-    )
-    args = parser.parse_args()
-
-    config = _load_config(args.config)
-    info = VillagerInfo(
-        config["input_base_path"],
-        config["unmined_path"],
-        config["target_village_name"],
-        config["output_path"],
-        True,
-    )
-    info.get_info()
-    return
-
-
-if __name__ == "__main__":
-    main()

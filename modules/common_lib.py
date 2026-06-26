@@ -1,7 +1,7 @@
 import cv2
 import os
 from typing import List
-from common_libs.point_3d import Point3D
+from modules.point_3d import Point3D
 from nbt.nbt import TAG_Compound, TAG_List
 
 
