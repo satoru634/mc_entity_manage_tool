@@ -84,13 +84,13 @@ source .venv/bin/activate
 ## 実行
 
 ```bash
-python villagers_info.py
+python mc_entity_manage_tool.py
 ```
 
 設定ファイルを明示的に指定する場合:
 
 ```bash
-python villagers_info.py -c config.json
+python mc_entity_manage_tool.py -c config.json
 ```
 
 ---
@@ -142,8 +142,9 @@ python villagers_info.py -c config.json
 
 ```
 mc_entity_manage_tool/
-├── villagers_info.py             # メインスクリプト
-├── common_libs/
+├── mc_entity_manage_tool.py      # メインエントリポイント
+├── modules/
+│   ├── villager_info.py          # VillagerInfo クラス（主処理）
 │   ├── common_lib.py             # 汎用ユーティリティ
 │   ├── const.py                  # 定数・テーブル定義
 │   ├── generate_unmined_marker.py # uNmined マーカー生成

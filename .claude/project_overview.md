@@ -17,8 +17,9 @@ Minecraft のワールドデータ（MCA Reborn & LittleMaidReBirth 導入環境
 ## アーキテクチャ概要
 
 ```
-villagers_info.py        ... メインエントリーポイント・VillagerInfo クラス
-common_libs/
+mc_entity_manage_tool.py ... メインエントリポイント（引数解析・設定読み込み）
+modules/
+  villager_info.py       ... VillagerInfo クラス（主処理）
   common_lib.py          ... 汎用ユーティリティ（UUID変換、NBT変換、画像書き込み等）
   const.py               ... 定数・抽出テーブル・職業名テーブル・コマンドテンプレート
   generate_unmined_marker.py  ... uNmined マーカー JS 生成
@@ -57,7 +58,7 @@ setup/
 
 ## 主要クラス・モジュール
 
-### VillagerInfo（villagers_info.py）
+### VillagerInfo（modules/villager_info.py）
 
 | メソッド | 役割 |
 |---|---|
@@ -149,19 +150,14 @@ setup/
 
 ---
 
-## 実行方法（現状）
+## 実行方法
 
-`villagers_info.py` の `main()` 関数内にパスをハードコーディングして直接実行する。
+`config.json` に各パスを設定したうえで `mc_entity_manage_tool.py` を実行する。
 
-```python
-info = VillagerInfo(
-    input_base_path,   # Minecraftワールドディレクトリ
-    unmined_path,      # uNmined 出力ディレクトリ
-    target_village_name,  # 属性更新コマンドを生成する対象村名
-    output_path,       # CSV出力先
-    filter_all_maid,   # True: 未契約メイドも含む / False: 除外
-)
-info.get_info()
+```bash
+python mc_entity_manage_tool.py
+# 設定ファイルを明示指定する場合
+python mc_entity_manage_tool.py -c config.json
 ```
 
 ---
@@ -170,6 +166,5 @@ info.get_info()
 
 - `const.py` の `eval()` による動的抽出は柔軟だが、型安全性がない
 - `__extract_villagers_info()` の except 節が広すぎる（全例外を握りつぶしている）
-- `main()` のパスがハードコーディング → 将来的には引数化・設定ファイル化が望ましい
-- `map_properties.py` の `MapProperties` クラスは現在 `villagers_info.py` から呼び出されていない（将来用の可能性）
-- `common_lib.py` の `imwrite()` も現状 `villagers_info.py` から直接は使われていない
+- `map_properties.py` の `MapProperties` クラスは現在 `villager_info.py` から呼び出されていない（将来用の可能性）
+- `common_lib.py` の `imwrite()` も現状 `villager_info.py` から直接は使われていない
