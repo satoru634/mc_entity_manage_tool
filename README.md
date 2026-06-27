@@ -138,6 +138,23 @@ python mc_entity_manage_tool.py -c config.json
 
 ---
 
+## テスト
+
+```bash
+python -m pytest test/
+```
+
+| テストファイル | 対象モジュール |
+|---|---|
+| `test/test_point_3d.py` | `modules/point_3d.py` |
+| `test/test_common_lib.py` | `modules/common_lib.py` |
+| `test/test_const.py` | `modules/const.py` |
+| `test/test_generate_unmined_marker.py` | `modules/generate_unmined_marker.py` |
+| `test/test_map_properties.py` | `modules/map_properties.py` |
+| `test/test_mc_entity_manage_tool.py` | `mc_entity_manage_tool.py` |
+
+---
+
 ## ファイル構成
 
 ```
@@ -150,6 +167,13 @@ mc_entity_manage_tool/
 │   ├── generate_unmined_marker.py # uNmined マーカー生成
 │   ├── map_properties.py         # uNmined マッププロパティ読み込み
 │   └── point_3d.py               # 3次元座標クラス
+├── test/
+│   ├── test_mc_entity_manage_tool.py
+│   ├── test_common_lib.py
+│   ├── test_const.py
+│   ├── test_generate_unmined_marker.py
+│   ├── test_map_properties.py
+│   └── test_point_3d.py
 ├── config.json                   # 設定ファイル（テンプレート）
 ├── requirements.txt              # 依存ライブラリ一覧
 └── setup/

@@ -25,6 +25,13 @@ modules/
   generate_unmined_marker.py  ... uNmined マーカー JS 生成
   map_properties.py      ... uNmined マッププロパティ読み込み・ズーム計算
   point_3d.py            ... 3次元座標クラス
+test/
+  test_mc_entity_manage_tool.py ... mc_entity_manage_tool.py のテスト
+  test_common_lib.py     ... common_lib.py のテスト
+  test_const.py          ... const.py のテスト
+  test_generate_unmined_marker.py ... generate_unmined_marker.py のテスト
+  test_map_properties.py ... map_properties.py のテスト
+  test_point_3d.py       ... point_3d.py のテスト
 requirements.txt         ... 依存ライブラリ一覧
 setup/
   setup_venv.bat         ... venv セットアップスクリプト（Windows）
